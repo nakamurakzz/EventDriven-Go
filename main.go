@@ -3,13 +3,23 @@ package main
 import (
 	"time"
 
-	"github.com/nakamurakzz/event-driven-go/triggers"
+	"github.com/nakamurakzz/event-driven-go/hub"
+	"github.com/nakamurakzz/event-driven-go/sendor"
+	"github.com/nakamurakzz/event-driven-go/sensor"
 )
 
 func main() {
-	userCreateRequest := triggers.UserCreateRequest{
-		Email: "test@example.com",
+	envSendor := sendor.NewEnvSendor()
+	hub := hub.NewHub()
+	envSensor := sensor.NewEnvSensorer()
+
+	hub.Register(&envSendor)
+	envSensor.Register(&hub)
+
+	// 繰り返し実行
+	for {
+		envSensor.SetTemplature(10)
+		envSensor.Notify()
+		time.Sleep(5 * time.Second)
 	}
-	triggers.CreateUser(userCreateRequest)
-	time.Sleep(3 * time.Second)
 }

@@ -47,10 +47,21 @@ func (h *Hub) Recieve(payload RecievePayload) {
 				(*s).Recieve(sData)
 				continue
 			}
+			if payload.eventType == "light" {
+				sData := sendor.LightSendorPayload{
+					Power: payload.data.(LightSensorPayload).Power,
+				}
+				(*s).Recieve(sData)
+				continue
+			}
 		}
 	}
 }
 
 type EnvSensorPayload struct {
 	Temperature float64
+}
+
+type LightSensorPayload struct {
+	Power float64
 }

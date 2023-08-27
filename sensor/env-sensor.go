@@ -2,6 +2,8 @@ package sensor
 
 import (
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/nakamurakzz/event-driven-go/hub"
 )
@@ -44,4 +46,24 @@ func (e *EnvSensorer) GetTemplature() float64 {
 func (e *EnvSensorer) SetTemplature(t float64) {
 	log.Printf("SetTemplature: %f", t)
 	e.temperature = t
+}
+
+func (e *EnvSensorer) Start() error {
+	// HTTPサーバーを起動
+	mux := http.NewServeMux()
+	mux.HandleFunc("/env", e.Recieve)
+	// Web サーバーの待ち受けを開始
+	log.Fatal(http.ListenAndServe(":6000", mux))
+	return nil
+}
+
+func (e *EnvSensorer) Recieve(w http.ResponseWriter, r *http.Request) {
+	log.Println("Recieve")
+	// get query params and convert to float64
+	temperature, err := strconv.ParseFloat(r.URL.Query().Get("t"), 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	e.temperature = temperature
+	e.Notify()
 }

@@ -1,25 +1,32 @@
 package main
 
 import (
-	"time"
-
 	"github.com/nakamurakzz/event-driven-go/hub"
 	"github.com/nakamurakzz/event-driven-go/sendor"
 	"github.com/nakamurakzz/event-driven-go/sensor"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
-	envSendor := sendor.NewEnvSendor()
 	hub := hub.NewHub()
+	envSendor := sendor.NewEnvSendor()
 	envSensor := sensor.NewEnvSensorer()
+	lightSendor := sendor.NewLightSendor()
+	lightSensor := sensor.NewLightSensorer()
 
 	hub.Register(&envSendor)
+	hub.Register(&lightSendor)
 	envSensor.Register(&hub)
+	lightSensor.Register(&hub)
 
-	// 繰り返し実行
-	for {
-		envSensor.SetTemplature(10)
-		envSensor.Notify()
-		time.Sleep(5 * time.Second)
-	}
+	errgroup := errgroup.Group{}
+	errgroup.Go(func() error {
+		return envSensor.Start()
+	})
+	errgroup.Go(func() error {
+		return lightSensor.Start()
+	})
+
+	errgroup.Wait()
+
 }

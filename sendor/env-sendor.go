@@ -37,7 +37,7 @@ func (e *EnvSendor) Recieve(data interface{}) {
 }
 
 func (e *EnvSendor) Print() {
-	log.Println("temperature: ", e.temperature)
+	log.Println("Print temperature: ", e.temperature)
 }
 
 func (e *EnvSendor) GetSendorType() string {

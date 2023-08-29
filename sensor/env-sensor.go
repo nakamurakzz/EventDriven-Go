@@ -44,12 +44,12 @@ func (e *EnvSensorer) SetTemperature(t float64) {
 
 func (e *EnvSensorer) Start() error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/env", e.Receive)
+	mux.HandleFunc("/env", e.GetFromHttp)
 	log.Println("Start env sensor")
 	return http.ListenAndServe(":6002", mux)
 }
 
-func (e *EnvSensorer) Receive(w http.ResponseWriter, r *http.Request) {
+func (e *EnvSensorer) GetFromHttp(w http.ResponseWriter, r *http.Request) {
 	temperature, err := strconv.ParseFloat(r.URL.Query().Get("t"), 64)
 	if err != nil {
 		http.Error(w, "Invalid temperature value", http.StatusBadRequest)
@@ -57,4 +57,19 @@ func (e *EnvSensorer) Receive(w http.ResponseWriter, r *http.Request) {
 	}
 	e.SetTemperature(temperature)
 	e.Notify()
+}
+
+func (l *EnvSensorer) Recieve(data interface{}) {
+	// 型アサーション
+	sData, ok := data.(types.LightSensorPayload)
+	if !ok {
+		log.Printf("Failed to type assert data: %v to LightSendorPayload", data)
+		return
+	}
+	l.temperature = sData.Power
+	log.Printf("temperature: %f", l.temperature)
+}
+
+func (e *EnvSensorer) GetType() string {
+	return e.sensorType
 }

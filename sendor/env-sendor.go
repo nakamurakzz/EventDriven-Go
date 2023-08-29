@@ -36,6 +36,6 @@ func (e *EnvSendor) Print() {
 	log.Printf("Temperature: %f", e.temperature)
 }
 
-func (e *EnvSendor) GetSendorType() string {
+func (e *EnvSendor) GetType() string {
 	return e.sendorType
 }

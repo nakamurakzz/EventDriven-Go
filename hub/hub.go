@@ -1,8 +1,11 @@
 package hub
 
-import (
-	"github.com/nakamurakzz/event-driven-go/sendor"
-)
+type Observer interface {
+	Register(h *Huber)
+	Notify()
+	Recieve(data interface{})
+	GetType() string
+}
 
 type ReceivePayload struct {
 	eventType string
@@ -19,21 +22,21 @@ func NewReceivePayload(eventType string, data interface{}) ReceivePayload {
 type Huber interface {
 	Notify(payload ReceivePayload)
 	Receive(payload ReceivePayload)
-	Register(s sendor.Sendorer)
+	Register(o Observer)
 }
 
 type Hub struct {
-	sendors map[string]sendor.Sendorer
+	observers map[string][]Observer
 }
 
 func NewHub() Huber {
 	return &Hub{
-		sendors: make(map[string]sendor.Sendorer),
+		observers: make(map[string][]Observer),
 	}
 }
 
-func (h *Hub) Register(s sendor.Sendorer) {
-	h.sendors[s.GetSendorType()] = s
+func (h *Hub) Register(o Observer) {
+	h.observers[o.GetType()] = append(h.observers[o.GetType()], o)
 }
 
 func (h *Hub) Receive(payload ReceivePayload) {
@@ -41,7 +44,7 @@ func (h *Hub) Receive(payload ReceivePayload) {
 }
 
 func (h *Hub) Notify(payload ReceivePayload) {
-	if s, ok := h.sendors[payload.eventType]; ok {
-		s.Receive(payload.data)
+	for _, o := range h.observers[payload.eventType] {
+		go o.Recieve(payload.data)
 	}
 }

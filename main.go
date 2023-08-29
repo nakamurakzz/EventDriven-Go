@@ -13,6 +13,7 @@ func main() {
 	sensors := initializeSensors()
 	for _, s := range sensors {
 		s.Register(&h)
+		h.Register(&s)
 	}
 
 	sendors := initializeSendors()

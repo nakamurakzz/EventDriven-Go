@@ -47,12 +47,12 @@ func (l *LightSensorer) SetPower(p float64) {
 
 func (l *LightSensorer) Start() error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/light", l.Receive)
+	mux.HandleFunc("/light", l.GetFromHttp)
 	log.Println("Start light sensor")
 	return http.ListenAndServe(":6001", mux)
 }
 
-func (l *LightSensorer) Receive(w http.ResponseWriter, r *http.Request) {
+func (l *LightSensorer) GetFromHttp(w http.ResponseWriter, r *http.Request) {
 	power, err := strconv.ParseFloat(r.URL.Query().Get("p"), 64)
 	if err != nil {
 		http.Error(w, "Invalid power value", http.StatusBadRequest)
@@ -60,4 +60,19 @@ func (l *LightSensorer) Receive(w http.ResponseWriter, r *http.Request) {
 	}
 	l.SetPower(power)
 	l.Notify()
+}
+
+func (l *LightSensorer) Recieve(data interface{}) {
+	// 型アサーション
+	sData, ok := data.(types.LightSensorPayload)
+	if !ok {
+		log.Printf("Failed to type assert data: %v to LightSendorPayload", data)
+		return
+	}
+	l.power = sData.Power
+	log.Printf("Power: %f", l.power)
+}
+
+func (l *LightSensorer) GetType() string {
+	return l.sensorType
 }

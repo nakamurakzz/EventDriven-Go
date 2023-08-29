@@ -35,6 +35,6 @@ func (l *LightSendor) Print() {
 	log.Printf("Power: %f", l.power)
 }
 
-func (l *LightSendor) GetSendorType() string {
+func (l *LightSendor) GetType() string {
 	return l.sendorType
 }

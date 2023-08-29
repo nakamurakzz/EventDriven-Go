@@ -2,6 +2,8 @@ package sendor
 
 import (
 	"log"
+
+	"github.com/nakamurakzz/event-driven-go/types"
 )
 
 type EnvSendor struct {
@@ -10,26 +12,20 @@ type EnvSendor struct {
 }
 
 // 型アサーション
-var _ Sendor = (*EnvSendor)(nil)
+var _ Sendorer = (*EnvSendor)(nil)
 
-func NewEnvSendor() Sendor {
+func NewEnvSendor() Sendorer {
 	return &EnvSendor{
 		sendorType: "env",
 	}
 }
 
-type EnvSendorPayload struct {
-	Temperature float64
-}
-
-func (e *EnvSendor) Recieve(data interface{}) {
-	log.Printf("Recieve: %v", data)
-
+func (e *EnvSendor) Receive(data interface{}) {
+	log.Printf("Receive: %v", data)
 	// 型アサーション
-	sData, ok := data.(EnvSendorPayload)
+	sData, ok := data.(types.EnvSensorPayload)
 	if !ok {
-		log.Printf("data: %v", data)
-		log.Println("failed to type assertion")
+		log.Printf("Failed to type assert data: %v to EnvSensorPayload", data)
 		return
 	}
 	e.temperature = sData.Temperature
@@ -37,10 +33,9 @@ func (e *EnvSendor) Recieve(data interface{}) {
 }
 
 func (e *EnvSendor) Print() {
-	log.Println("Print temperature: ", e.temperature)
+	log.Printf("Temperature: %f", e.temperature)
 }
 
 func (e *EnvSendor) GetSendorType() string {
-	log.Println("GetSendorType")
 	return e.sendorType
 }

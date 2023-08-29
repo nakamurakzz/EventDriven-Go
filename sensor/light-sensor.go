@@ -6,16 +6,18 @@ import (
 	"strconv"
 
 	"github.com/nakamurakzz/event-driven-go/hub"
+	"github.com/nakamurakzz/event-driven-go/types"
 )
 
 type LightSensorer struct {
 	power      float64
 	sensorType string
-
-	hubers []*hub.Huber
+	hubers     []*hub.Huber
 }
 
-func NewLightSensorer() *LightSensorer {
+var _ Sensorer = (*LightSensorer)(nil)
+
+func NewLightSensor() *LightSensorer {
 	return &LightSensorer{
 		sensorType: "light",
 	}
@@ -26,43 +28,36 @@ func (l *LightSensorer) Register(h *hub.Huber) {
 }
 
 func (l *LightSensorer) Notify() {
-	log.Println("Notify")
-	payload := hub.NewRecievePayload(l.sensorType, hub.LightSensorPayload{
+	payload := hub.NewReceivePayload(l.sensorType, types.LightSensorPayload{
 		Power: l.power,
 	})
 
-	log.Printf("payload: %v", payload)
-
 	for _, ob := range l.hubers {
-		go (*ob).Recieve(payload)
+		go (*ob).Receive(payload)
 	}
 }
 
-func (l *LightSensorer) GetTemplature() float64 {
-	log.Println("GetTemplature")
+func (l *LightSensorer) GetPower() float64 {
 	return l.power
 }
 
-func (l *LightSensorer) SetTemplature(t float64) {
-	log.Printf("SetTemplature: %f", t)
-	l.power = t
+func (l *LightSensorer) SetPower(p float64) {
+	l.power = p
 }
 
 func (l *LightSensorer) Start() error {
-	// HTTPサーバーを起動
 	mux := http.NewServeMux()
-	mux.HandleFunc("/light", l.Recieve)
-	// Web サーバーの待ち受けを開始
-	log.Fatal(http.ListenAndServe(":6001", mux))
-	return nil
+	mux.HandleFunc("/light", l.Receive)
+	log.Println("Start light sensor")
+	return http.ListenAndServe(":6001", mux)
 }
 
-func (l *LightSensorer) Recieve(w http.ResponseWriter, r *http.Request) {
-	log.Println("Recieve")
+func (l *LightSensorer) Receive(w http.ResponseWriter, r *http.Request) {
 	power, err := strconv.ParseFloat(r.URL.Query().Get("p"), 64)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, "Invalid power value", http.StatusBadRequest)
+		return
 	}
-	l.power = power
+	l.SetPower(power)
 	l.Notify()
 }

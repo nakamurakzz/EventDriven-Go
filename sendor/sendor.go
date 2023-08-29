@@ -1,7 +1,8 @@
 package sendor
 
-type Sendor interface {
-	Recieve(data interface{})
+type Sendorer interface {
+	// use Generics
+	Receive(data interface{})
 	Print()
 	GetSendorType() string
 }

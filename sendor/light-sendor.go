@@ -2,6 +2,8 @@ package sendor
 
 import (
 	"log"
+
+	"github.com/nakamurakzz/event-driven-go/types"
 )
 
 type LightSendor struct {
@@ -10,37 +12,29 @@ type LightSendor struct {
 }
 
 // 型アサーション
-var _ Sendor = (*LightSendor)(nil)
+var _ Sendorer = (*LightSendor)(nil)
 
-func NewLightSendor() Sendor {
+func NewLightSendor() Sendorer {
 	return &LightSendor{
 		sendorType: "light",
 	}
 }
 
-type LightSendorPayload struct {
-	Power float64
-}
-
-func (e *LightSendor) Recieve(data interface{}) {
-	log.Printf("Recieve: %v", data)
-
+func (l *LightSendor) Receive(data interface{}) {
 	// 型アサーション
-	sData, ok := data.(LightSendorPayload)
+	sData, ok := data.(types.LightSensorPayload)
 	if !ok {
-		log.Printf("data: %v", data)
-		log.Println("failed to type assertion")
+		log.Printf("Failed to type assert data: %v to LightSendorPayload", data)
 		return
 	}
-	e.power = sData.Power
-	e.Print()
+	l.power = sData.Power
+	l.Print()
 }
 
-func (e *LightSendor) Print() {
-	log.Println("power: ", e.power)
+func (l *LightSendor) Print() {
+	log.Printf("Power: %f", l.power)
 }
 
-func (e *LightSendor) GetSendorType() string {
-	log.Println("GetSendorType")
-	return e.sendorType
+func (l *LightSendor) GetSendorType() string {
+	return l.sendorType
 }

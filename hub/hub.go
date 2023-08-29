@@ -1,67 +1,47 @@
 package hub
 
 import (
-	"log"
-
 	"github.com/nakamurakzz/event-driven-go/sendor"
 )
 
-type RecievePayload struct {
+type ReceivePayload struct {
 	eventType string
 	data      interface{}
 }
 
-func NewRecievePayload(eventType string, data interface{}) RecievePayload {
-	return RecievePayload{
+func NewReceivePayload(eventType string, data interface{}) ReceivePayload {
+	return ReceivePayload{
 		eventType: eventType,
 		data:      data,
 	}
 }
 
 type Huber interface {
-	Recieve(payload RecievePayload)
-	Register(s *sendor.Sendor)
+	Notify(payload ReceivePayload)
+	Receive(payload ReceivePayload)
+	Register(s sendor.Sendorer)
 }
 
 type Hub struct {
-	sendors []*sendor.Sendor
+	sendors map[string]sendor.Sendorer
 }
 
 func NewHub() Huber {
-	return &Hub{}
-}
-
-func (h *Hub) Register(s *sendor.Sendor) {
-	log.Printf("Register: %s", (*s).GetSendorType())
-	h.sendors = append(h.sendors, s)
-}
-
-func (h *Hub) Recieve(payload RecievePayload) {
-	log.Printf("Recieve: %v", payload)
-	for _, s := range h.sendors {
-		if payload.eventType == (*s).GetSendorType() {
-			if payload.eventType == "env" {
-				sData := sendor.EnvSendorPayload{
-					Temperature: payload.data.(EnvSensorPayload).Temperature,
-				}
-				(*s).Recieve(sData)
-				continue
-			}
-			if payload.eventType == "light" {
-				sData := sendor.LightSendorPayload{
-					Power: payload.data.(LightSensorPayload).Power,
-				}
-				(*s).Recieve(sData)
-				continue
-			}
-		}
+	return &Hub{
+		sendors: make(map[string]sendor.Sendorer),
 	}
 }
 
-type EnvSensorPayload struct {
-	Temperature float64
+func (h *Hub) Register(s sendor.Sendorer) {
+	h.sendors[s.GetSendorType()] = s
 }
 
-type LightSensorPayload struct {
-	Power float64
+func (h *Hub) Receive(payload ReceivePayload) {
+	h.Notify(payload)
+}
+
+func (h *Hub) Notify(payload ReceivePayload) {
+	if s, ok := h.sendors[payload.eventType]; ok {
+		s.Receive(payload.data)
+	}
 }

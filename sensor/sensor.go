@@ -1,12 +1,10 @@
 package sensor
 
-import (
-	"github.com/nakamurakzz/event-driven-go/hub"
-)
+import "github.com/nakamurakzz/event-driven-go/hub"
 
 type Sensorer interface {
-	Resister(hub hub.Huber)
+	Register(h *hub.Huber)
 	Notify()
 
-	GetTemplature() float64
+	Start() error
 }

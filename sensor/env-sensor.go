@@ -11,7 +11,7 @@ import (
 
 type EnvSensorer struct {
 	temperature float64
-	sensorType  string
+	Type        string
 	hubers      []*hub.Huber
 }
 
@@ -20,7 +20,7 @@ var _ Sensorer = (*EnvSensorer)(nil)
 
 func NewEnvSensor() *EnvSensorer {
 	return &EnvSensorer{
-		sensorType: "env",
+		Type: "env",
 	}
 }
 
@@ -29,7 +29,7 @@ func (e *EnvSensorer) Register(h *hub.Huber) {
 }
 
 func (e *EnvSensorer) Notify() {
-	payload := hub.NewReceivePayload(e.sensorType, types.EnvSensorPayload{
+	payload := hub.NewReceivePayload(e.Type, types.EnvSensorPayload{
 		Temperature: e.temperature,
 	})
 
@@ -71,5 +71,5 @@ func (l *EnvSensorer) Recieve(data interface{}) {
 }
 
 func (e *EnvSensorer) GetType() string {
-	return e.sensorType
+	return e.Type
 }

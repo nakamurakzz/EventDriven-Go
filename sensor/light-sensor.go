@@ -10,16 +10,16 @@ import (
 )
 
 type LightSensorer struct {
-	power      float64
-	sensorType string
-	hubers     []*hub.Huber
+	power  float64
+	Type   string
+	hubers []*hub.Huber
 }
 
 var _ Sensorer = (*LightSensorer)(nil)
 
 func NewLightSensor() *LightSensorer {
 	return &LightSensorer{
-		sensorType: "light",
+		Type: "light",
 	}
 }
 
@@ -28,7 +28,7 @@ func (l *LightSensorer) Register(h *hub.Huber) {
 }
 
 func (l *LightSensorer) Notify() {
-	payload := hub.NewReceivePayload(l.sensorType, types.LightSensorPayload{
+	payload := hub.NewReceivePayload(l.Type, types.LightSensorPayload{
 		Power: l.power,
 	})
 
@@ -74,5 +74,5 @@ func (l *LightSensorer) Recieve(data interface{}) {
 }
 
 func (l *LightSensorer) GetType() string {
-	return l.sensorType
+	return l.Type
 }

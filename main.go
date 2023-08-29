@@ -10,38 +10,28 @@ import (
 func main() {
 	h := hub.NewHub()
 
-	sensors := initializeSensors()
-	for _, s := range sensors {
-		s.Register(&h)
-		h.Register(&s)
-	}
-
-	sendors := initializeSendors()
-	for _, s := range sendors {
-		h.Register(s)
+	observers := initializeObserver()
+	for _, o := range observers {
+		o.Register(&h)
+		h.Register(o)
 	}
 
 	g := errgroup.Group{}
-	for _, s := range sensors {
-		sensor := s // capture loop variable
+	for _, observer := range observers {
+		o := observer // capture loop variable
 		g.Go(func() error {
-			return sensor.Start()
+			return o.Start()
 		})
 	}
 
 	g.Wait()
 }
 
-func initializeSensors() []sensor.Sensorer {
-	return []sensor.Sensorer{
-		sensor.NewEnvSensor(),
-		sensor.NewLightSensor(),
-	}
-}
-
-func initializeSendors() []sendor.Sendorer {
-	return []sendor.Sendorer{
+func initializeObserver() []hub.Observer {
+	return []hub.Observer{
 		sendor.NewEnvSendor(),
 		sendor.NewLightSendor(),
+		sensor.NewEnvSensor(),
+		sensor.NewLightSensor(),
 	}
 }

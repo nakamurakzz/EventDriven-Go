@@ -7,11 +7,8 @@ import (
 )
 
 type Sensorer interface {
-	Register(h *hub.Huber)
-	Notify()
-	Recieve(data interface{})
+	hub.Observer
 
 	Start() error
 	GetFromHttp(w http.ResponseWriter, r *http.Request)
-	GetType() string
 }

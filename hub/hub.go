@@ -5,6 +5,7 @@ type Observer interface {
 	Notify()
 	Recieve(data interface{})
 	GetType() string
+	Start() error
 }
 
 type ReceivePayload struct {

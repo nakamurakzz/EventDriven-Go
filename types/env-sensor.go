@@ -1,5 +1,5 @@
 package types
 
-type EnvSensorPayload struct {
+type EnvPayload struct {
 	Temperature float64
 }

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/nakamurakzz/event-driven-go/hub"
-	"github.com/nakamurakzz/event-driven-go/sendor"
-	"github.com/nakamurakzz/event-driven-go/sensor"
+	"github.com/nakamurakzz/event-driven-go/observer"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -24,14 +25,17 @@ func main() {
 		})
 	}
 
-	g.Wait()
+	err := g.Wait()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func initializeObserver() []hub.Observer {
 	return []hub.Observer{
-		sendor.NewEnvSendor(),
-		sendor.NewLightSendor(),
-		sensor.NewEnvSensor(),
-		sensor.NewLightSensor(),
+		observer.NewEnvBackObserver(),
+		observer.NewLightBackObserver(),
+		observer.NewEnvFrontObserver(),
+		observer.NewLightFrontObserver(),
 	}
 }

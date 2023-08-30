@@ -1,5 +1,5 @@
 package types
 
-type LightSensorPayload struct {
+type LightPayload struct {
 	Power float64
 }

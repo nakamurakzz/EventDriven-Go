@@ -1,41 +1,42 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
 
-	"github.com/nakamurakzz/event-driven-go/hub"
-	"github.com/nakamurakzz/event-driven-go/observer"
-	"golang.org/x/sync/errgroup"
+	"github.com/nakamurakzz/event-driven-go/component"
 )
 
 func main() {
-	h := hub.NewHub()
-
-	observers := initializeObserver()
-	for _, o := range observers {
-		o.Register(&h)
-		h.Register(o)
-	}
-
-	g := errgroup.Group{}
-	for _, observer := range observers {
-		o := observer // capture loop variable
-		g.Go(func() error {
-			return o.Start()
-		})
-	}
-
-	err := g.Wait()
-	if err != nil {
-		log.Println(err)
-	}
+	os.Exit(run())
 }
 
-func initializeObserver() []hub.Observer {
-	return []hub.Observer{
-		observer.NewEnvBackObserver(),
-		observer.NewLightBackObserver(),
-		observer.NewEnvFrontObserver(),
-		observer.NewLightFrontObserver(),
-	}
+func run() int {
+	ctx := context.Background()
+	h := component.NewHub()
+	components := component.InitializeComponent()
+
+	sigctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
+	defer cancel()
+
+	go func() {
+		for i := range components {
+			c := components[i]
+
+			c.Register(&h)
+			h.Register(c)
+
+			go func() {
+				err := c.Start()
+				if err != nil {
+					log.Println(err)
+				}
+			}()
+		}
+	}()
+
+	<-sigctx.Done()
+	return 0
 }

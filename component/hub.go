@@ -1,6 +1,8 @@
-package hub
+package component
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // EventTypes
 const (
@@ -12,19 +14,6 @@ const (
 	EnvEvent
 )
 
-type Observer interface {
-	Register(h *Huber)
-	Notify()
-	Recieve(data interface{})
-	GetType() []int
-	Start() error
-}
-
-type ReceivePayload struct {
-	eventType int
-	data      interface{}
-}
-
 func NewReceivePayload(eventType int, data interface{}) ReceivePayload {
 	return ReceivePayload{
 		eventType: eventType,
@@ -32,23 +21,15 @@ func NewReceivePayload(eventType int, data interface{}) ReceivePayload {
 	}
 }
 
-type Huber interface {
-	Notify(payload ReceivePayload)
-	Receive(payload ReceivePayload)
-	Register(o Observer)
-}
-
-type Hub struct {
-	observers map[int][]Observer
-}
-
 func NewHub() Huber {
 	return &Hub{
-		observers: make(map[int][]Observer),
+		observers: make(map[int][]Componenter),
 	}
 }
 
-func (h *Hub) Register(o Observer) {
+var _ Huber = (*Hub)(nil)
+
+func (h *Hub) Register(o Componenter) {
 	for _, t := range o.GetType() {
 		h.observers[t] = append(h.observers[t], o)
 	}

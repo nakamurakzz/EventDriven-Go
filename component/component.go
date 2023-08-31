@@ -8,38 +8,13 @@ type Componenter interface {
 	Start() error
 }
 
-type LightPayload struct {
-	Power float64
-}
-
-type EnvPayload struct {
-	Temperature float64
-}
-
 func InitializeComponent() []Componenter {
 	return []Componenter{
-		NewEnvBackComponent(),
-		NewLightBackComponent(),
-		NewEnvFrontComponent(),
-		NewLightFrontComponent(),
+		NewEnvComponent("EnvFront", EnvEventFromBack, 6001),
+		NewEnvComponent("EnvBack", EnvEventFromFront, 6002),
+		NewLightComponent("LightFront", LightEventFromBack, 7001),
+		NewLightComponent("LightBack", LightEventFromFront, 7002),
 	}
-}
-
-type EnvBackComponent struct {
-	temperature float64
-	Type        []int
-	hubers      []*Huber
-}
-
-type EnvFrontComponent struct {
-	temperature float64
-	Type        []int
-	hubers      []*Huber
-}
-
-type ReceivePayload struct {
-	eventType int
-	data      interface{}
 }
 
 type Huber interface {
@@ -48,18 +23,47 @@ type Huber interface {
 	Register(o Componenter)
 }
 
+type LightPayload struct {
+	Power float64
+}
+
+func NewLightPayload(p float64) *LightPayload {
+	return &LightPayload{
+		Power: p,
+	}
+}
+
+type EnvPayload struct {
+	Temperature float64
+}
+
+func NewEnvPayload(t float64) *EnvPayload {
+	return &EnvPayload{
+		Temperature: t,
+	}
+}
+
+type EnvComponent struct {
+	Name    string
+	payload []*EnvPayload
+	Type    []int
+	hubers  []*Huber
+	port    int // 暫定, Configで管理する
+}
+
+type ReceivePayload struct {
+	eventType int
+	data      interface{}
+}
+
 type Hub struct {
 	observers map[int][]Componenter
 }
 
-type LightBackComponent struct {
-	power  float64
-	Type   []int
-	hubers []*Huber
-}
-
-type LightFrontComponent struct {
-	power  float64
-	Type   []int
-	hubers []*Huber
+type LightComponent struct {
+	Name    string
+	payload []*LightPayload
+	Type    []int
+	hubers  []*Huber
+	port    int
 }

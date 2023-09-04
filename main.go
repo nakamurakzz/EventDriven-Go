@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/nakamurakzz/event-driven-go/component"
+	"github.com/nakamurakzz/event-driven-go/pubsub"
 )
 
 func main() {
@@ -20,6 +21,8 @@ func run() int {
 
 	sigctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
 	defer cancel()
+
+	pubsub.Exec()
 
 	go func() {
 		for i := range components {

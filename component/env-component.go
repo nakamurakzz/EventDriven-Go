@@ -22,7 +22,7 @@ func (e *EnvComponent) Register(h *Huber) {
 	e.hubers = append(e.hubers, h)
 }
 
-func (e *EnvComponent) Recieve(data interface{}) {
+func (e *EnvComponent) Recieve(data ReceivePayloader) {
 	// 型アサーション
 	sData, ok := data.(EnvPayload)
 	if !ok {

@@ -4,16 +4,6 @@ import (
 	"fmt"
 )
 
-// EventTypes
-const (
-	LightEventFromBack = iota
-	EnvEventFromBack
-	LightEventFromFront
-	EnvEventFromFront
-	LightEvent
-	EnvEvent
-)
-
 func NewReceivePayload(eventType int, data interface{}) ReceivePayload {
 	return ReceivePayload{
 		eventType: eventType,

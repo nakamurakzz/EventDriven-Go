@@ -22,14 +22,13 @@ func (l *LightComponent) Register(h *Huber) {
 	l.hubers = append(l.hubers, h)
 }
 
-func (l *LightComponent) Recieve(data interface{}) {
-	// 型アサーション
-	sData, ok := data.(LightPayload)
-	if !ok {
+func (l *LightComponent) Recieve(data ReceivePayloader) {
+	evType := data.GetType()
+	if evType != LightEventFromFront {
 		log.Printf("Failed to type assert data: %v to LightPayload", data)
 		return
 	}
-	log.Printf("Recieved Power: %f", sData.Power)
+	log.Printf("Recieved Power: %f", data.Power)
 	l.SetPayload(NewLightPayload(sData.Power))
 }
 

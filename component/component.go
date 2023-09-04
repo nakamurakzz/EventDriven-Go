@@ -1,9 +1,21 @@
 package component
 
+type EventType int
+
+// EventTypes
+const (
+	LightEventFromBack = iota
+	EnvEventFromBack
+	LightEventFromFront
+	EnvEventFromFront
+	LightEvent
+	EnvEvent
+)
+
 type Componenter interface {
 	Register(h *Huber)
 	Notify()
-	Recieve(data interface{})
+	Recieve(data ReceivePayloader)
 	GetType() []int
 	Start() error
 }
@@ -33,8 +45,16 @@ func NewLightPayload(p float64) *LightPayload {
 	}
 }
 
+func (l LightPayload) GetType() int {
+	return LightEventFromBack
+}
+
 type EnvPayload struct {
 	Temperature float64
+}
+
+func (e EnvPayload) GetType() int {
+	return EnvEventFromBack
 }
 
 func NewEnvPayload(t float64) *EnvPayload {
@@ -51,13 +71,25 @@ type EnvComponent struct {
 	port    int // 暫定, Configで管理する
 }
 
+type ReceivePayloader interface {
+	GetType() int
+}
+
+func ReceivePayloads[T ReceivePayloader]() []T {
+	return nil
+}
+
 type ReceivePayload struct {
-	eventType int
-	data      interface{}
+	eventType EventType
+	data      ReceivePayloader
+}
+
+func (r ReceivePayload) GetType() EventType {
+	return r.eventType
 }
 
 type Hub struct {
-	observers map[int][]Componenter
+	observers map[EventType][]Componenter
 }
 
 type LightComponent struct {
